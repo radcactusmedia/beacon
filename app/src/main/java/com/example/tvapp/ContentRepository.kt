@@ -11,8 +11,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.util.Locale
 
-class ContentRepository(context: Context) {
+class ContentRepository(private val context: Context) {
     private val client = HttpClient(OkHttp) {
         install(ContentNegotiation) {
             json(Json { ignoreUnknownKeys = true })
@@ -33,6 +34,8 @@ class ContentRepository(context: Context) {
     }
 
     suspend fun getPlaylist(): Playlist = withContext(Dispatchers.IO) {
+        val local = loadLocalPlaylist()
+        if (local.items.isNotEmpty()) return@withContext local
         if (playlistFile.exists()) {
             runCatching {
                 Json.decodeFromString<Playlist>(playlistFile.readText())
@@ -55,6 +58,27 @@ class ContentRepository(context: Context) {
 
     fun savePlaylist(data: Playlist) {
         playlistFile.writeText(Json.encodeToString(Playlist.serializer(), data))
+    }
+
+    private fun loadLocalPlaylist(): Playlist {
+        val dir = File(context.getExternalFilesDir(null), "media")
+        if (!dir.exists()) return Playlist(0, emptyList())
+        val items = dir.listFiles()?.filter { file ->
+            val name = file.name.lowercase(Locale.getDefault())
+            name.endsWith(".mp4") || name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png")
+        }?.map { file ->
+            VideoItem(
+                id = file.name,
+                title = file.name,
+                url = file.absolutePath
+            )
+        } ?: emptyList()
+        return Playlist(1, items)
+    }
+
+    fun getSplashFile(): File? {
+        val f = File(context.getExternalFilesDir(null), "splash")
+        return if (f.exists()) f else null
     }
 
     companion object {
