@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class TvViewModel(application: Application) : AndroidViewModel(application) {
-    private val repo = ContentRepository(application)
+    val repo = ContentRepository(application)
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState
@@ -19,9 +19,9 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
 
     fun refresh() {
         viewModelScope.launch {
-            val message = repo.getMessage()
             val playlist = repo.getPlaylist()
-            _uiState.value = UiState(message.message, playlist)
+            val shuffled = playlist.items.shuffled()
+            _uiState.value = UiState(playlist = playlist.copy(items = shuffled))
         }
     }
 

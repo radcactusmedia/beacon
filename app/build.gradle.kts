@@ -1,11 +1,13 @@
 plugins {
     id("com.android.application")
     kotlin("android")
-    kotlin("plugin.serialization")
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
 }
 
 android {
     compileSdk = 34
+
+    namespace = "com.example.tvapp"
 
     defaultConfig {
         applicationId = "com.example.tvapp"

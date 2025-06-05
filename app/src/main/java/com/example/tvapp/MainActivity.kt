@@ -4,14 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,28 +25,40 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TvApp(viewModel: TvViewModel) {
-    val uiState by viewModel.uiState.collectAsState()
-    var time by remember { mutableStateOf("") }
+    var messageIndex by remember { mutableStateOf(0) }
+    var timeString by remember { mutableStateOf("") }
+    val zone = ZoneId.of("America/Phoenix")
+
     LaunchedEffect(Unit) {
         while (true) {
-            time = java.text.SimpleDateFormat("HH:mm:ss").format(java.util.Date())
-            delay(1000)
+            timeString = ZonedDateTime.now(zone).format(DateTimeFormatter.ofPattern("h:mma", java.util.Locale.US)).lowercase()
+            delay(60_000)
         }
     }
+
+    LaunchedEffect(messageIndex) {
+        delay(600_000)
+        messageIndex = (messageIndex + 1) % 3
+    }
+
+    val date = ZonedDateTime.now(zone)
+    val daySuffix = when (val d = date.dayOfMonth) {
+        11,12,13 -> "th"
+        else -> when (d % 10) { 1 -> "st";2->"nd";3->"rd";else->"th" }
+    }
+    val dateString = date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d", java.util.Locale.US)) + daySuffix + ", " + date.year
+
+    val message = when (messageIndex) {
+        0 -> "The time is currently $timeString in Chandler, AZ"
+        1 -> "You're shopping at Walmart 6480"
+        else -> "Today is $dateString"
+    }
+
     Scaffold(topBar = {
-        TopAppBar(title = { Text(time) })
+        TopAppBar(title = { Text(message) }, backgroundColor = androidx.compose.ui.graphics.Color(0xFF0053E2))
     }) { padding ->
-        Column(Modifier.padding(padding)) {
-            Text(text = uiState.message, style = MaterialTheme.typography.h5, modifier = Modifier.padding(16.dp))
-            LazyColumn {
-                items(uiState.playlist.items.size) { index ->
-                    val item = uiState.playlist.items[index]
-                    Button(onClick = { viewModel.play(item) }, modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                        Text(item.title)
-                    }
-                }
-            }
-            PlayerView(viewModel)
+        Box(Modifier.fillMaxSize().padding(padding)) {
+            SlideshowPlayer(viewModel)
         }
     }
 }
