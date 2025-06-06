@@ -35,8 +35,8 @@ fun SlideshowPlayer(viewModel: TvViewModel) {
         index = 0
     }
 
-    LaunchedEffect(showSplash) {
-        if (showSplash) {
+    LaunchedEffect(showSplash, playlist) {
+        if (showSplash && playlist.isNotEmpty()) {
             delay(10_000)
             showSplash = false
             showLoading = true
@@ -73,7 +73,7 @@ fun SlideshowPlayer(viewModel: TvViewModel) {
     }
 
     when {
-        showSplash && splashFile != null -> {
+        (showSplash || playlist.isEmpty()) && splashFile != null -> {
             MediaItemView(file = splashFile, player = player)
         }
         showLoading -> {
