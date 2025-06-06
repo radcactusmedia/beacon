@@ -82,6 +82,8 @@ class ContentRepository(private val context: Context) {
     }
 
     companion object {
+        // Public GitHub repository containing the source code
+        const val REPO_URL = "https://github.com/radcactusmedia/beacon.git"
         const val MESSAGE_URL = "https://raw.githubusercontent.com/example/repo/main/message.json"
         const val PLAYLIST_URL = "https://raw.githubusercontent.com/example/repo/main/playlist.json"
     }
