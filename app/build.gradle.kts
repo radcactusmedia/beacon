@@ -46,6 +46,9 @@ dependencies {
     implementation("com.google.android.exoplayer:exoplayer:2.18.5")
     implementation("androidx.work:work-runtime-ktx:2.8.1")
 
+    // Image loading library
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
     implementation("io.ktor:ktor-client-core:2.3.1")
     implementation("io.ktor:ktor-client-okhttp:2.3.1")
     implementation("io.ktor:ktor-client-content-negotiation:2.3.1")
