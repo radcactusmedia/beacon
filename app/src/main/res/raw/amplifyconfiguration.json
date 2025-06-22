@@ -1,0 +1,30 @@
+{
+  "auth": {
+    "plugins": {
+      "awsCognitoAuthPlugin": {
+        "UserAgent": "aws-amplify/cli",
+        "Version": "1",
+        "IdentityManager": {
+          "Default": {}
+        }
+      }
+    }
+  },
+  "api": {
+    "plugins": {
+      "awsAPIPlugin": {
+        "endpointType": "REST",
+        "endpoint": "https://example.com",
+        "region": "us-east-1"
+      }
+    }
+  },
+  "storage": {
+    "plugins": {
+      "awsS3StoragePlugin": {
+        "bucket": "YOUR_BUCKET_NAME",
+        "region": "us-east-1"
+      }
+    }
+  }
+}

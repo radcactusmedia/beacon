@@ -1,12 +1,10 @@
 package com.example.tvapp
 
 import android.content.Context
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
-import io.ktor.serialization.kotlinx.json.*
+import com.amplifyframework.core.Amplify
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -14,11 +12,6 @@ import java.io.File
 import java.util.Locale
 
 class ContentRepository(private val context: Context) {
-    private val client = HttpClient(OkHttp) {
-        install(ContentNegotiation) {
-            json(Json { ignoreUnknownKeys = true })
-        }
-    }
     private val cacheDir = File(context.filesDir, "cache").apply { mkdirs() }
 
     private val messageFile = File(cacheDir, "message.json")
@@ -44,12 +37,25 @@ class ContentRepository(private val context: Context) {
         fetchPlaylist().also { savePlaylist(it) }
     }
 
+    private suspend fun download(key: String, file: File) {
+        suspendCancellableCoroutine<Unit> { cont ->
+            Amplify.Storage.downloadFile(
+                key,
+                file,
+                { cont.resume(Unit) },
+                { error -> cont.resumeWithException(error) }
+            )
+        }
+    }
+
     suspend fun fetchMessage(): MessageData {
-        return client.get(MESSAGE_URL).body()
+        download(MESSAGE_KEY, messageFile)
+        return Json.decodeFromString(messageFile.readText())
     }
 
     suspend fun fetchPlaylist(): Playlist {
-        return client.get(PLAYLIST_URL).body()
+        download(PLAYLIST_KEY, playlistFile)
+        return Json.decodeFromString(playlistFile.readText())
     }
 
     fun saveMessage(data: MessageData) {
@@ -84,7 +90,7 @@ class ContentRepository(private val context: Context) {
     companion object {
         // Public GitHub repository containing the source code
         const val REPO_URL = "https://github.com/radcactusmedia/beacon.git"
-        const val MESSAGE_URL = "https://raw.githubusercontent.com/example/repo/main/message.json"
-        const val PLAYLIST_URL = "https://raw.githubusercontent.com/example/repo/main/playlist.json"
+        const val MESSAGE_KEY = "message.json"
+        const val PLAYLIST_KEY = "playlist.json"
     }
 }

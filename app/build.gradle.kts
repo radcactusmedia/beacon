@@ -49,10 +49,9 @@ dependencies {
     // Image loading library
     implementation("io.coil-kt:coil-compose:2.4.0")
 
-    implementation("io.ktor:ktor-client-core:2.3.1")
-    implementation("io.ktor:ktor-client-okhttp:2.3.1")
-    implementation("io.ktor:ktor-client-content-negotiation:2.3.1")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.1")
-
+    implementation("com.amplifyframework:core:2.27.4")
+    implementation("com.amplifyframework:aws-api:2.27.4")
+    implementation("com.amplifyframework:aws-storage-s3:2.27.4")
+    implementation("com.amplifyframework:aws-auth-cognito:2.27.4")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 }
